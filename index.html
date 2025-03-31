@@ -150,6 +150,7 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
         
         h3 {
@@ -158,6 +159,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         table {
@@ -243,6 +246,24 @@
             margin-top: 20px;
         }
         
+        .date-input {
+            position: relative;
+            flex: 1;
+        }
+        
+        .date-input input {
+            width: 100%;
+            padding-right: 30px;
+        }
+        
+        .date-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        
         @media (max-width: 768px) {
             .input-section {
                 grid-template-columns: 1fr;
@@ -255,6 +276,14 @@
             
             label {
                 margin-bottom: 5px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                width: 100%;
             }
         }
     </style>
@@ -278,6 +307,14 @@
                         <option value="">Məhsul seçin və ya yazın</option>
                     </select>
                 </div>
+                
+                <div class="input-row">
+                    <label for="operationDate">Tarix:</label>
+                    <div class="date-input">
+                        <input type="datetime-local" id="operationDate">
+                        <span class="date-icon">📅</span>
+                    </div>
+                </div>
             </div>
             
             <div class="input-group">
@@ -289,6 +326,12 @@
                 <div class="input-row">
                     <label for="minStock">Min. Stok:</label>
                     <input type="number" id="minStock" placeholder="Min. stok səviyyəsi" min="0">
+                </div>
+                
+                <div class="input-row">
+                    <button class="btn-new-category" onclick="openNewCategoryModal()" style="width: 100%;">
+                        <span>➕</span> Yeni Kateqoriya Əlavə Et
+                    </button>
                 </div>
             </div>
         </div>
@@ -340,6 +383,23 @@
         </table>
     </div>
     
+    <!-- Yeni Kateqoriya Əlavə Modalı -->
+    <div id="newCategoryModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Yeni Kateqoriya Əlavə Et</h3>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="newCategoryName">Kateqoriya Adı:</label>
+                <input type="text" id="newCategoryName" placeholder="Kateqoriya adı daxil edin" style="flex: 1;">
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeNewCategoryModal()" style="background: #ccc;">Ləğv et</button>
+                <button onclick="saveNewCategory()" class="btn-add">Yadda Saxla</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Yeni Məhsul Əlavə Modalı -->
     <div id="newProductModal" class="modal">
         <div class="modal-content">
@@ -347,10 +407,10 @@
             
             <div class="input-row" style="margin-bottom: 15px;">
                 <label for="newCategory">Kateqoriya:</label>
-                <select id="newCategory" style="flex: 1;">
+                <select id="newCategory" style="flex: 1;" onchange="toggleCustomCategory()">
                     <option value="">Yeni kateqoriya əlavə et</option>
                 </select>
-                <input type="text" id="customCategory" placeholder="Və ya yeni kateqoriya adı" style="flex: 1; display: none;">
+                <input type="text" id="customCategory" placeholder="Yeni kateqoriya adı" style="flex: 1; display: none;">
             </div>
             
             <div class="input-row" style="margin-bottom: 15px;">
@@ -385,13 +445,15 @@
                 filterProductsByCategory();
             });
             
-            $('#newCategory').on('change', function() {
-                if(this.value === '') {
-                    $('#customCategory').show();
-                } else {
-                    $('#customCategory').hide();
-                }
-            });
+            // Tarix inputuna bu günün tarixini təyin et
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('operationDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
             
             // Başlanğıc məlumatları yüklə
             loadInitialData();
@@ -444,6 +506,7 @@
             const product = document.getElementById('productName').value.trim();
             const qty = parseInt(document.getElementById('quantity').value);
             const minStock = parseInt(document.getElementById('minStock').value) || 0;
+            const operationDate = document.getElementById('operationDate').value || new Date().toISOString();
             
             if (!category || !product || !qty || qty <= 0) {
                 alert('Zəhmət olmasa düzgün kateqoriya, məhsul adı və miqdar daxil edin!');
@@ -483,7 +546,7 @@
             stockData[category][product].history.push({
                 type: "add",
                 qty: qty,
-                date: new Date().toISOString()
+                date: operationDate
             });
             
             saveData();
@@ -496,6 +559,7 @@
             const category = document.getElementById('productCategory').value;
             const product = document.getElementById('productName').value.trim();
             const qty = parseInt(document.getElementById('quantity').value);
+            const operationDate = document.getElementById('operationDate').value || new Date().toISOString();
             
             if (!category || !product || !qty || qty <= 0) {
                 alert('Zəhmət olmasa düzgün kateqoriya, məhsul adı və miqdar daxil edin!');
@@ -518,7 +582,7 @@
             stockData[category][product].history.push({
                 type: "remove",
                 qty: qty,
-                date: new Date().toISOString()
+                date: operationDate
             });
             
             // Stok sıfır və ya altına düşərsə
@@ -650,9 +714,50 @@
             }
         }
         
+        // Yeni kateqoriya modalını aç
+        function openNewCategoryModal() {
+            document.getElementById('newCategoryModal').style.display = 'flex';
+            document.getElementById('newCategoryName').focus();
+        }
+        
+        // Yeni kateqoriya modalını bağla
+        function closeNewCategoryModal() {
+            document.getElementById('newCategoryModal').style.display = 'none';
+            document.getElementById('newCategoryName').value = '';
+        }
+        
+        // Yeni kateqoriya yadda saxla
+        function saveNewCategory() {
+            const categoryName = document.getElementById('newCategoryName').value.trim();
+            
+            if (!categoryName) {
+                alert('Zəhmət olmasa kateqoriya adı daxil edin!');
+                return;
+            }
+            
+            // Kateqoriyanın mövcud olub olmadığını yoxla
+            if (productCatalog[categoryName]) {
+                alert('Bu kateqoriya artıq mövcuddur!');
+                return;
+            }
+            
+            // Yeni kateqoriya əlavə et
+            productCatalog[categoryName] = [];
+            
+            // Dropdown-ları yenilə
+            updateProductDropdowns();
+            
+            // Modalı bağla və inputu təmizlə
+            closeNewCategoryModal();
+            
+            // Yeni əlavə edilən kateqoriyanı seç
+            $('#productCategory').val(categoryName).trigger('change');
+        }
+        
         // Yeni məhsul modalını aç
         function openNewProductModal() {
             document.getElementById('newProductModal').style.display = 'flex';
+            document.getElementById('newProductName').focus();
         }
         
         // Yeni məhsul modalını bağla
@@ -663,6 +768,18 @@
             document.getElementById('newCategory').value = '';
             document.getElementById('customCategory').value = '';
             document.getElementById('customCategory').style.display = 'none';
+        }
+        
+        // Xüsusi kateqoriya inputunu göstər/gizlət
+        function toggleCustomCategory() {
+            const newCategorySelect = document.getElementById('newCategory');
+            const customCategoryInput = document.getElementById('customCategory');
+            
+            if (newCategorySelect.value === '') {
+                customCategoryInput.style.display = 'block';
+            } else {
+                customCategoryInput.style.display = 'none';
+            }
         }
         
         // Yeni məhsul yadda saxla
@@ -755,6 +872,16 @@
         function clearInputs() {
             document.getElementById('quantity').value = '';
             document.getElementById('minStock').value = '';
+            
+            // Tarixi yenilə
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('operationDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
     </script>
 </body>
