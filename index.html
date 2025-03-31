@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Anbar İdarəetmə Sistemi</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -127,6 +128,11 @@
         
         .btn-new-category {
             background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-clear {
+            background-color: var(--dark);
             color: white;
         }
         
@@ -269,6 +275,17 @@
             flex: 1;
         }
         
+        .delete-btn {
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn:hover {
+            transform: scale(1.2);
+        }
+        
         @media (min-width: 768px) {
             .container {
                 padding: 25px;
@@ -377,6 +394,9 @@
             <button class="btn-export" onclick="exportToExcel()">
                 <span>📊</span> Excelə Çıxar
             </button>
+            <button class="btn-clear" onclick="confirmClearStorage()">
+                <span><i class="fas fa-trash-alt"></i></span> Local Storage Təmizlə
+            </button>
         </div>
         
         <h3>
@@ -404,6 +424,7 @@
                         <th>Min. Stok</th>
                         <th>Son Əməliyyat Tarixi</th>
                         <th>Status</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="stockTable">
@@ -460,6 +481,19 @@
         </div>
     </div>
 
+    <!-- Local Storage Təmizləmə Təsdiq Modalı -->
+    <div id="clearStorageModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Local Storage Təmizləmə</h3>
+            <p>Bütün stok məlumatlarını və məhsul kataloqunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!</p>
+            
+            <div class="modal-actions">
+                <button onclick="closeClearStorageModal()" style="background: #ccc;">Ləğv et</button>
+                <button onclick="clearLocalStorage()" class="btn-remove">Təmizlə</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Stok veri quruluşu
@@ -501,7 +535,7 @@
             table.innerHTML = '';
             
             if (Object.keys(stockData).length === 0) {
-                table.innerHTML = '<tr><td colspan="6" class="empty-stock">Stokda məhsul tapılmadı</td></tr>';
+                table.innerHTML = '<tr><td colspan="7" class="empty-stock">Stokda məhsul tapılmadı</td></tr>';
                 return;
             }
             
@@ -520,8 +554,26 @@
                         <td>${item.minStock || '-'}</td>
                         <td>${lastOperation}</td>
                         <td>${isLowStock ? '⚠️ Aşağı Stok' : '✅ Kifayətdir'}</td>
+                        <td><i class="fas fa-trash-alt delete-btn" onclick="deleteProduct('${category}', '${product}')" title="Məhsulu sil"></i></td>
                     `;
                     table.appendChild(row);
+                }
+            }
+        }
+        
+        // Məhsulu sil
+        function deleteProduct(category, product) {
+            if (confirm(`"${product}" məhsulunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!`)) {
+                if (stockData[category] && stockData[category][product]) {
+                    delete stockData[category][product];
+                    
+                    // Kateqoriya boşdursa kateqoriyanı da sil
+                    if (Object.keys(stockData[category]).length === 0) {
+                        delete stockData[category];
+                    }
+                    
+                    saveData();
+                    loadStock();
                 }
             }
         }
@@ -916,6 +968,34 @@
             document.getElementById('quantity').value = '';
             document.getElementById('minStock').value = '';
             setCurrentDateTime();
+        }
+        
+        // Local storage təmizləmə təsdiq modalını aç
+        function confirmClearStorage() {
+            document.getElementById('clearStorageModal').style.display = 'flex';
+        }
+        
+        // Local storage təmizləmə təsdiq modalını bağla
+        function closeClearStorageModal() {
+            document.getElementById('clearStorageModal').style.display = 'none';
+        }
+        
+        // Local storage təmizlə
+        function clearLocalStorage() {
+            localStorage.removeItem('stockData');
+            localStorage.removeItem('productCatalog');
+            stockData = {};
+            productCatalog = {};
+            
+            // UI-ı yenilə
+            loadStock();
+            updateCategoryDropdowns();
+            document.getElementById('productName').innerHTML = '<option value=""></option>';
+            
+            // Modalı bağla
+            closeClearStorageModal();
+            
+            alert('Local storage uğurla təmizləndi!');
         }
     </script>
 </body>
