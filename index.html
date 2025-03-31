@@ -136,6 +136,11 @@
             color: white;
         }
         
+        .btn-manage {
+            background-color: var(--primary);
+            color: white;
+        }
+        
         button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
@@ -146,6 +151,17 @@
             flex-direction: column;
             gap: 10px;
             margin-top: 15px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .quick-actions button {
+            margin-bottom: 0;
+            flex: 1;
         }
         
         h3 {
@@ -236,6 +252,9 @@
             margin-bottom: 15px;
             color: var(--secondary);
             font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .modal-actions {
@@ -243,6 +262,11 @@
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
+        }
+        
+        .modal-actions button {
+            width: auto;
+            padding: 10px 20px;
         }
         
         .date-input {
@@ -286,6 +310,62 @@
             transform: scale(1.2);
         }
         
+        .edit-btn {
+            color: var(--info);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            margin-right: 10px;
+        }
+        
+        .edit-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .confirmation-modal .modal-content {
+            text-align: center;
+        }
+        
+        .confirmation-modal .modal-title {
+            justify-content: center;
+        }
+        
+        .confirmation-modal .modal-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--danger);
+        }
+        
+        .confirmation-text {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .management-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .management-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .management-item:last-child {
+            border-bottom: none;
+        }
+        
+        .management-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
         @media (min-width: 768px) {
             .container {
                 padding: 25px;
@@ -316,6 +396,10 @@
                 flex: 1;
             }
             
+            .quick-actions {
+                margin-bottom: 0;
+            }
+            
             h3 {
                 flex-direction: row;
                 justify-content: space-between;
@@ -337,6 +421,18 @@
 <body>
     <div class="container">
         <h2>🏨 Hotel Anbar İdarəetmə Sistemi</h2>
+        
+        <div class="quick-actions">
+            <button class="btn-new-category" onclick="openNewCategoryModal()">
+                <span>➕</span> Yeni Kateqoriya
+            </button>
+            <button class="btn-new-category" onclick="openNewProductModal()">
+                <span>🆕</span> Yeni Məhsul
+            </button>
+            <button class="btn-manage" onclick="openManagementModal()">
+                <span>⚙️</span> İdarəetmə
+            </button>
+        </div>
         
         <div class="input-section">
             <div class="input-group">
@@ -372,12 +468,6 @@
                     <label for="minStock">Min. Stok:</label>
                     <input type="number" id="minStock" placeholder="Min. stok səviyyəsi" min="0">
                 </div>
-                
-                <div class="input-row">
-                    <button class="btn-new-category" onclick="openNewCategoryModal()">
-                        <span>➕</span> Yeni Kateqoriya Əlavə Et
-                    </button>
-                </div>
             </div>
         </div>
         
@@ -388,14 +478,11 @@
             <button class="btn-remove" onclick="removeStock()">
                 <span>➖</span> Stok Çıxar
             </button>
-            <button class="btn-new-category" onclick="openNewProductModal()">
-                <span>🆕</span> Yeni Məhsul Əlavə Et
-            </button>
             <button class="btn-export" onclick="exportToExcel()">
                 <span>📊</span> Excelə Çıxar
             </button>
             <button class="btn-clear" onclick="confirmClearStorage()">
-                <span><i class="fas fa-trash-alt"></i></span> Local Storage Təmizlə
+                <span><i class="fas fa-trash-alt"></i></span> Təmizlə
             </button>
         </div>
         
@@ -405,11 +492,12 @@
                 <select id="filterCategory" onchange="filterStock()">
                     <option value="">Bütün Kateqoriyalar</option>
                 </select>
-                <select id="exportDateFilter">
+                <select id="dateFilter" onchange="applyDateFilter()">
                     <option value="all">Bütün tarixlər</option>
                     <option value="today">Bugün</option>
                     <option value="week">Bu həftə</option>
                     <option value="month">Bu ay</option>
+                    <option value="custom">Xüsusi tarix aralığı</option>
                 </select>
             </div>
         </h3>
@@ -437,7 +525,7 @@
     <!-- Yeni Kateqoriya Əlavə Modalı -->
     <div id="newCategoryModal" class="modal">
         <div class="modal-content">
-            <h3 class="modal-title">Yeni Kateqoriya Əlavə Et</h3>
+            <h3 class="modal-title"><i class="fas fa-folder-plus"></i> Yeni Kateqoriya Əlavə Et</h3>
             
             <div class="input-row" style="margin-bottom: 15px;">
                 <label for="newCategoryName">Kateqoriya Adı:</label>
@@ -454,7 +542,7 @@
     <!-- Yeni Məhsul Əlavə Modalı -->
     <div id="newProductModal" class="modal">
         <div class="modal-content">
-            <h3 class="modal-title">Yeni Məhsul Əlavə Et</h3>
+            <h3 class="modal-title"><i class="fas fa-box-open"></i> Yeni Məhsul Əlavə Et</h3>
             
             <div class="input-row" style="margin-bottom: 15px;">
                 <label for="newCategory">Kateqoriya:</label>
@@ -482,14 +570,89 @@
     </div>
 
     <!-- Local Storage Təmizləmə Təsdiq Modalı -->
-    <div id="clearStorageModal" class="modal">
+    <div id="clearStorageModal" class="modal confirmation-modal">
         <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
             <h3 class="modal-title">Local Storage Təmizləmə</h3>
-            <p>Bütün stok məlumatlarını və məhsul kataloqunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!</p>
+            <p class="confirmation-text">Bütün stok məlumatlarını və məhsul kataloqunu silmək istədiyinizə əminsiniz?<br>Bu əməliyyat geri alına bilməz!</p>
             
             <div class="modal-actions">
                 <button onclick="closeClearStorageModal()" style="background: #ccc;">Ləğv et</button>
                 <button onclick="clearLocalStorage()" class="btn-remove">Təmizlə</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Xüsusi Tarix Aralığı Modalı -->
+    <div id="customDateRangeModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-calendar-alt"></i> Xüsusi Tarix Aralığı Seçin</h3>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="startDate">Başlanğıc Tarix:</label>
+                <input type="datetime-local" id="startDate">
+            </div>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="endDate">Bitmə Tarix:</label>
+                <input type="datetime-local" id="endDate">
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeCustomDateRangeModal()" style="background: #ccc;">Ləğv et</button>
+                <button onclick="applyCustomDateFilter()" class="btn-add">Tətbiq et</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Silmə Təsdiq Modalı -->
+    <div id="deleteConfirmationModal" class="modal confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 class="modal-title" id="deleteModalTitle">Silmə Təsdiqi</h3>
+            <p class="confirmation-text" id="deleteModalText">Bu əməliyyat geri alına bilməz!</p>
+            
+            <div class="modal-actions">
+                <button onclick="closeDeleteConfirmationModal()" style="background: #ccc;">Ləğv et</button>
+                <button onclick="confirmDeleteAction()" class="btn-remove">Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kateqoriya və Məhsul İdarəetmə Modalı -->
+    <div id="managementModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-cog"></i> Kateqoriya və Məhsul İdarəetmə</h3>
+            
+            <div class="tabs" style="display: flex; border-bottom: 1px solid #ddd; margin-bottom: 15px;">
+                <button id="categoryTab" class="tab-button active" onclick="switchTab('category')" style="flex: 1; padding: 10px; border: none; background: none; border-bottom: 3px solid var(--primary);">Kateqoriyalar</button>
+                <button id="productTab" class="tab-button" onclick="switchTab('product')" style="flex: 1; padding: 10px; border: none; background: none; border-bottom: 3px solid transparent;">Məhsullar</button>
+            </div>
+            
+            <div id="categoryManagement" class="tab-content">
+                <div class="management-list" id="categoryList">
+                    <!-- Kateqoriya siyahısı burada görünəcək -->
+                </div>
+            </div>
+            
+            <div id="productManagement" class="tab-content" style="display: none;">
+                <div class="input-row" style="margin-bottom: 15px;">
+                    <label for="manageCategoryFilter">Kateqoriya:</label>
+                    <select id="manageCategoryFilter" onchange="loadProductsForManagement()">
+                        <option value="">Bütün Kateqoriyalar</option>
+                    </select>
+                </div>
+                <div class="management-list" id="productList">
+                    <!-- Məhsul siyahısı burada görünəcək -->
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeManagementModal()" style="background: #ccc;">Bağla</button>
             </div>
         </div>
     </div>
@@ -499,6 +662,9 @@
         // Stok veri quruluşu
         let stockData = JSON.parse(localStorage.getItem('stockData')) || {};
         let productCatalog = JSON.parse(localStorage.getItem('productCatalog')) || {};
+        let currentDateFilter = 'all';
+        let customDateRange = null;
+        let currentDeleteAction = { type: null, data: null };
         
         // Səhifə yükləndikdə
         document.addEventListener('DOMContentLoaded', function() {
@@ -517,6 +683,198 @@
             });
         });
         
+        // Tabları dəyişdir
+        function switchTab(tab) {
+            document.getElementById('categoryTab').classList.remove('active');
+            document.getElementById('productTab').classList.remove('active');
+            document.getElementById('categoryTab').style.borderBottomColor = 'transparent';
+            document.getElementById('productTab').style.borderBottomColor = 'transparent';
+            
+            document.getElementById('categoryManagement').style.display = 'none';
+            document.getElementById('productManagement').style.display = 'none';
+            
+            if (tab === 'category') {
+                document.getElementById('categoryTab').classList.add('active');
+                document.getElementById('categoryTab').style.borderBottomColor = 'var(--primary)';
+                document.getElementById('categoryManagement').style.display = 'block';
+                loadCategoriesForManagement();
+            } else {
+                document.getElementById('productTab').classList.add('active');
+                document.getElementById('productTab').style.borderBottomColor = 'var(--primary)';
+                document.getElementById('productManagement').style.display = 'block';
+                loadProductsForManagement();
+            }
+        }
+        
+        // İdarəetmə modalını aç
+        function openManagementModal() {
+            document.getElementById('managementModal').style.display = 'flex';
+            switchTab('category');
+        }
+        
+        // İdarəetmə modalını bağla
+        function closeManagementModal() {
+            document.getElementById('managementModal').style.display = 'none';
+        }
+        
+        // Kateqoriyaları idarəetmə üçün yüklə
+        function loadCategoriesForManagement() {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            
+            const categories = Object.keys(productCatalog);
+            
+            if (categories.length === 0) {
+                categoryList.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">Kateqoriya tapılmadı</div>';
+                return;
+            }
+            
+            categories.forEach(category => {
+                const item = document.createElement('div');
+                item.className = 'management-item';
+                item.innerHTML = `
+                    <span>${category}</span>
+                    <div class="management-item-actions">
+                        <i class="fas fa-edit edit-btn" onclick="editCategory('${category}')" title="Düzəlt"></i>
+                        <i class="fas fa-trash-alt delete-btn" onclick="showDeleteConfirmation('category', '${category}')" title="Sil"></i>
+                    </div>
+                `;
+                categoryList.appendChild(item);
+            });
+            
+            // Kateqoriya filter dropdown-unu yenilə
+            const manageCategoryFilter = document.getElementById('manageCategoryFilter');
+            manageCategoryFilter.innerHTML = '<option value="">Bütün Kateqoriyalar</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                manageCategoryFilter.appendChild(option);
+            });
+        }
+        
+        // Məhsulları idarəetmə üçün yüklə
+        function loadProductsForManagement() {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            
+            const categoryFilter = document.getElementById('manageCategoryFilter').value;
+            let hasProducts = false;
+            
+            for (const category in productCatalog) {
+                if (categoryFilter && categoryFilter !== category) continue;
+                
+                productCatalog[category].forEach(product => {
+                    hasProducts = true;
+                    const item = document.createElement('div');
+                    item.className = 'management-item';
+                    item.innerHTML = `
+                        <div style="display: flex; flex-direction: column;">
+                            <span>${product}</span>
+                            <small class="category-badge">${category}</small>
+                        </div>
+                        <div class="management-item-actions">
+                            <i class="fas fa-edit edit-btn" onclick="editProduct('${category}', '${product}')" title="Düzəlt"></i>
+                            <i class="fas fa-trash-alt delete-btn" onclick="showDeleteConfirmation('product', '${category}', '${product}')" title="Sil"></i>
+                        </div>
+                    `;
+                    productList.appendChild(item);
+                });
+            }
+            
+            if (!hasProducts) {
+                productList.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">Məhsul tapılmadı</div>';
+            }
+        }
+        
+        // Kateqoriyanı redaktə et
+        function editCategory(category) {
+            document.getElementById('newCategoryName').value = category;
+            openNewCategoryModal();
+            
+            // Köhnə adı silmək üçün qeyd edirik
+            document.getElementById('newCategoryName').dataset.oldName = category;
+        }
+        
+        // Məhsulu redaktə et
+        function editProduct(category, product) {
+            document.getElementById('newCategory').value = category;
+            document.getElementById('newProductName').value = product;
+            
+            // Min stok dəyərini tap və təyin et
+            let minStock = 0;
+            if (stockData[category] && stockData[category][product]) {
+                minStock = stockData[category][product].minStock || 0;
+            }
+            document.getElementById('defaultMinStock').value = minStock;
+            
+            openNewProductModal();
+            
+            // Köhnə adı silmək üçün qeyd edirik
+            document.getElementById('newProductName').dataset.oldName = product;
+            document.getElementById('newProductName').dataset.oldCategory = category;
+        }
+        
+        // Silmə təsdiq modalını göstər
+        function showDeleteConfirmation(type, category, product = null) {
+            currentDeleteAction.type = type;
+            currentDeleteAction.data = { category, product };
+            
+            const modal = document.getElementById('deleteConfirmationModal');
+            const title = document.getElementById('deleteModalTitle');
+            const text = document.getElementById('deleteModalText');
+            
+            if (type === 'category') {
+                title.innerHTML = `<i class="fas fa-folder"></i> Kateqoriyanı Sil`;
+                text.innerHTML = `"${category}" kateqoriyasını və bütün məhsullarını silmək istədiyinizə əminsiniz?<br>Bu əməliyyat geri alına bilməz!`;
+            } else {
+                title.innerHTML = `<i class="fas fa-box-open"></i> Məhsulu Sil`;
+                text.innerHTML = `"${product}" məhsulunu silmək istədiyinizə əminsiniz?<br>Bu əməliyyat geri alına bilməz!`;
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Silmə təsdiq modalını bağla
+        function closeDeleteConfirmationModal() {
+            document.getElementById('deleteConfirmationModal').style.display = 'none';
+        }
+        
+        // Silmə əməliyyatını təsdiqlə
+        function confirmDeleteAction() {
+            if (currentDeleteAction.type === 'category') {
+                deleteCategory(currentDeleteAction.data.category);
+            } else {
+                deleteProduct(currentDeleteAction.data.category, currentDeleteAction.data.product, true);
+            }
+            closeDeleteConfirmationModal();
+        }
+        
+        // Kateqoriyanı sil
+        function deleteCategory(category) {
+            // Stokdan sil
+            if (stockData[category]) {
+                delete stockData[category];
+            }
+            
+            // Kataloqdan sil
+            if (productCatalog[category]) {
+                delete productCatalog[category];
+            }
+            
+            saveData();
+            updateCategoryDropdowns();
+            loadStock();
+            loadCategoriesForManagement();
+            loadProductsForManagement();
+            
+            // Əgər cari seçilmiş kateqoriya silinən kateqoriyadırsa, sıfırla
+            if (document.getElementById('productCategory').value === category) {
+                document.getElementById('productCategory').value = '';
+                document.getElementById('productName').innerHTML = '<option value=""></option>';
+            }
+        }
+        
         // Tarix inputuna cari tarix və saatı təyin et
         function setCurrentDateTime() {
             const now = new Date();
@@ -527,6 +885,8 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             
             document.getElementById('operationDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('startDate').value = `${year}-${month}-${day}T00:00`;
+            document.getElementById('endDate').value = `${year}-${month}-${day}T23:59`;
         }
         
         // Səhifə yükləndikdə stokları yüklə
@@ -539,42 +899,161 @@
                 return;
             }
             
+            let hasData = false;
+            
             for (const category in stockData) {
                 for (const product in stockData[category]) {
                     const item = stockData[category][product];
-                    const isLowStock = item.quantity <= item.minStock;
-                    const lastOperation = item.history && item.history.length > 0 ? 
-                        formatDate(new Date(item.history[item.history.length-1].date)) : '-';
                     
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><span class="category-badge">${category}</span></td>
-                        <td>${product}</td>
-                        <td class="${isLowStock ? 'low-stock' : ''}">${item.quantity}</td>
-                        <td>${item.minStock || '-'}</td>
-                        <td>${lastOperation}</td>
-                        <td>${isLowStock ? '⚠️ Aşağı Stok' : '✅ Kifayətdir'}</td>
-                        <td><i class="fas fa-trash-alt delete-btn" onclick="deleteProduct('${category}', '${product}')" title="Məhsulu sil"></i></td>
-                    `;
-                    table.appendChild(row);
+                    // Əgər tarix filtri aktivdirsə, yalnız uyğun gələn tarixləri göstər
+                    let showItem = true;
+                    let lastOperationDate = null;
+                    let lastOperation = '-';
+                    
+                    if (item.history && item.history.length > 0) {
+                        // Ən son əməliyyatı tap
+                        const sortedHistory = [...item.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+                        lastOperation = sortedHistory[0];
+                        lastOperationDate = new Date(lastOperation.date);
+                        
+                        // Tarix filtri tətbiq et
+                        if (currentDateFilter !== 'all') {
+                            showItem = false;
+                            
+                            // Bütün tarix qeydlərini yoxla
+                            for (const entry of item.history) {
+                                const entryDate = new Date(entry.date);
+                                if (checkDateFilter(entryDate)) {
+                                    showItem = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (showItem) {
+                        hasData = true;
+                        const isLowStock = item.quantity <= item.minStock;
+                        const formattedDate = lastOperationDate ? formatDate(lastOperationDate) : '-';
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><span class="category-badge">${category}</span></td>
+                            <td>${product}</td>
+                            <td class="${isLowStock ? 'low-stock' : ''}">${item.quantity}</td>
+                            <td>${item.minStock || '-'}</td>
+                            <td>${formattedDate}</td>
+                            <td>${isLowStock ? '⚠️ Aşağı Stok' : '✅ Kifayətdir'}</td>
+                            <td><i class="fas fa-trash-alt delete-btn" onclick="showDeleteConfirmation('stock', '${category}', '${product}')" title="Məhsulu sil"></i></td>
+                        `;
+                        table.appendChild(row);
+                    }
                 }
+            }
+            
+            if (!hasData) {
+                table.innerHTML = '<tr><td colspan="7" class="empty-stock">Seçilmiş filtrlərə uyğun məhsul tapılmadı</td></tr>';
             }
         }
         
+        // Tarix filtri yoxlaması
+        function checkDateFilter(date) {
+            const now = new Date();
+            
+            switch(currentDateFilter) {
+                case 'today':
+                    return date.toDateString() === now.toDateString();
+                case 'week':
+                    const diffDays = Math.floor((now - date) / (1000*60*60*24));
+                    return diffDays <= 7;
+                case 'month':
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                case 'custom':
+                    if (!customDateRange) return false;
+                    return date >= customDateRange.start && date <= customDateRange.end;
+                default:
+                    return true;
+            }
+        }
+        
+        // Tarix filtri tətbiq et
+        function applyDateFilter() {
+            const filterValue = document.getElementById('dateFilter').value;
+            
+            if (filterValue === 'custom') {
+                openCustomDateRangeModal();
+                return;
+            }
+            
+            currentDateFilter = filterValue;
+            customDateRange = null;
+            loadStock();
+        }
+        
+        // Xüsusi tarix aralığı modalını aç
+        function openCustomDateRangeModal() {
+            document.getElementById('customDateRangeModal').style.display = 'flex';
+        }
+        
+        // Xüsusi tarix aralığı modalını bağla
+        function closeCustomDateRangeModal() {
+            document.getElementById('customDateRangeModal').style.display = 'none';
+            document.getElementById('dateFilter').value = 'all';
+        }
+        
+        // Xüsusi tarix filtri tətbiq et
+        function applyCustomDateFilter() {
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            
+            if (!startDate || !endDate) {
+                alert('Zəhmət olmasa başlanğıc və bitmə tarixlərini düzgün daxil edin!');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('Başlanğıc tarix bitmə tarixindən sonra ola bilməz!');
+                return;
+            }
+            
+            currentDateFilter = 'custom';
+            customDateRange = { start: startDate, end: endDate };
+            
+            closeCustomDateRangeModal();
+            loadStock();
+        }
+        
         // Məhsulu sil
-        function deleteProduct(category, product) {
-            if (confirm(`"${product}" məhsulunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!`)) {
-                if (stockData[category] && stockData[category][product]) {
-                    delete stockData[category][product];
-                    
-                    // Kateqoriya boşdursa kateqoriyanı da sil
-                    if (Object.keys(stockData[category]).length === 0) {
-                        delete stockData[category];
-                    }
-                    
-                    saveData();
-                    loadStock();
+        function deleteProduct(category, product, fromManagement = false) {
+            if (!fromManagement && !confirm(`"${product}" məhsulunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!`)) {
+                return;
+            }
+            
+            if (stockData[category] && stockData[category][product]) {
+                delete stockData[category][product];
+                
+                // Kateqoriya boşdursa kateqoriyanı da sil
+                if (Object.keys(stockData[category]).length === 0) {
+                    delete stockData[category];
                 }
+            }
+            
+            // Məhsulu kataloqdan sil
+            if (productCatalog[category] && productCatalog[category].includes(product)) {
+                productCatalog[category] = productCatalog[category].filter(p => p !== product);
+                
+                // Kateqoriya boşdursa kateqoriyanı da sil
+                if (productCatalog[category].length === 0) {
+                    delete productCatalog[category];
+                }
+            }
+            
+            saveData();
+            loadStock();
+            
+            if (fromManagement) {
+                loadProductsForManagement();
+                loadCategoriesForManagement();
             }
         }
         
@@ -696,9 +1175,6 @@
                 return;
             }
             
-            const dateFilter = document.getElementById('exportDateFilter').value;
-            const now = new Date();
-            
             // Excel verisini hazırla
             const data = [
                 ['Kateqoriya', 'Məhsul Adı', 'Miqdar', 'Əməliyyat Növü', 'Tarix'] // Başlıq sətri
@@ -714,19 +1190,10 @@
                             const entryDate = new Date(entry.date);
                             let include = false;
                             
-                            switch(dateFilter) {
-                                case 'today':
-                                    include = entryDate.toDateString() === now.toDateString();
-                                    break;
-                                case 'week':
-                                    const diffDays = Math.floor((now - entryDate) / (1000*60*60*24));
-                                    include = diffDays <= 7;
-                                    break;
-                                case 'month':
-                                    include = entryDate.getMonth() === now.getMonth() && entryDate.getFullYear() === now.getFullYear();
-                                    break;
-                                default:
-                                    include = true;
+                            if (currentDateFilter === 'all') {
+                                include = true;
+                            } else {
+                                include = checkDateFilter(entryDate);
                             }
                             
                             if (include) {
@@ -741,13 +1208,15 @@
                         });
                     } else {
                         // Əgər tarix qeydi yoxdursa, cari stok vəziyyətini əlavə et
-                        data.push([
-                            category,
-                            product,
-                            item.quantity,
-                            'Cari balans',
-                            '-'
-                        ]);
+                        if (currentDateFilter === 'all') {
+                            data.push([
+                                category,
+                                product,
+                                item.quantity,
+                                'Cari balans',
+                                '-'
+                            ]);
+                        }
                     }
                 }
             }
@@ -809,25 +1278,41 @@
         function closeNewCategoryModal() {
             document.getElementById('newCategoryModal').style.display = 'none';
             document.getElementById('newCategoryName').value = '';
+            delete document.getElementById('newCategoryName').dataset.oldName;
         }
         
         // Yeni kateqoriya yadda saxla
         function saveNewCategory() {
             const categoryName = document.getElementById('newCategoryName').value.trim();
+            const oldName = document.getElementById('newCategoryName').dataset.oldName;
             
             if (!categoryName) {
                 alert('Zəhmət olmasa kateqoriya adı daxil edin!');
                 return;
             }
             
-            // Kateqoriyanın mövcud olub olmadığını yoxla
-            if (productCatalog[categoryName]) {
-                alert('Bu kateqoriya artıq mövcuddur!');
-                return;
+            // Köhnə adı yenisi ilə əvəz et
+            if (oldName && oldName !== categoryName) {
+                // Stok verilərində dəyişiklik
+                if (stockData[oldName]) {
+                    stockData[categoryName] = stockData[oldName];
+                    delete stockData[oldName];
+                }
+                
+                // Kataloqda dəyişiklik
+                if (productCatalog[oldName]) {
+                    productCatalog[categoryName] = productCatalog[oldName];
+                    delete productCatalog[oldName];
+                }
+            } else if (!oldName) {
+                // Yeni kateqoriya əlavə et
+                if (productCatalog[categoryName]) {
+                    alert('Bu kateqoriya artıq mövcuddur!');
+                    return;
+                }
+                
+                productCatalog[categoryName] = [];
             }
-            
-            // Yeni kateqoriya əlavə et
-            productCatalog[categoryName] = [];
             
             // Dropdown-ları yenilə
             updateProductDropdowns();
@@ -838,6 +1323,10 @@
             // Yeni əlavə edilən kateqoriyanı seç
             document.getElementById('productCategory').value = categoryName;
             filterProductsByCategory();
+            
+            // İdarəetmə siyahılarını yenilə
+            loadCategoriesForManagement();
+            loadProductsForManagement();
         }
         
         // Yeni məhsul modalını aç
@@ -854,6 +1343,8 @@
             document.getElementById('newCategory').value = '';
             document.getElementById('customCategory').value = '';
             document.getElementById('customCategory').style.display = 'none';
+            delete document.getElementById('newProductName').dataset.oldName;
+            delete document.getElementById('newProductName').dataset.oldCategory;
         }
         
         // Xüsusi kateqoriya inputunu göstər/gizlət
@@ -873,6 +1364,8 @@
             let category = document.getElementById('newCategory').value;
             const customCategory = document.getElementById('customCategory').value.trim();
             const productName = document.getElementById('newProductName').value.trim();
+            const oldName = document.getElementById('newProductName').dataset.oldName;
+            const oldCategory = document.getElementById('newProductName').dataset.oldCategory;
             const minStock = parseInt(document.getElementById('defaultMinStock').value) || 0;
             
             if (category === '' && customCategory) {
@@ -884,6 +1377,38 @@
                 return;
             }
             
+            // Köhnə məhsulu sil
+            if (oldName && oldCategory) {
+                // Stokdan sil
+                if (stockData[oldCategory] && stockData[oldCategory][oldName]) {
+                    // Əgər kateqoriya dəyişməyibsə
+                    if (oldCategory === category) {
+                        const itemData = stockData[oldCategory][oldName];
+                        delete stockData[oldCategory][oldName];
+                        stockData[category][productName] = itemData;
+                    } else {
+                        // Kateqoriya dəyişibsə
+                        const itemData = stockData[oldCategory][oldName];
+                        delete stockData[oldCategory][oldName];
+                        
+                        if (!stockData[category]) {
+                            stockData[category] = {};
+                        }
+                        stockData[category][productName] = itemData;
+                    }
+                }
+                
+                // Kataloqdan sil
+                if (productCatalog[oldCategory] && productCatalog[oldCategory].includes(oldName)) {
+                    productCatalog[oldCategory] = productCatalog[oldCategory].filter(p => p !== oldName);
+                    
+                    // Kateqoriya boşdursa sil
+                    if (productCatalog[oldCategory].length === 0) {
+                        delete productCatalog[oldCategory];
+                    }
+                }
+            }
+            
             // Kataloğa əlavə et
             if (!productCatalog[category]) {
                 productCatalog[category] = [];
@@ -891,6 +1416,11 @@
             
             if (!productCatalog[category].includes(productName)) {
                 productCatalog[category].push(productName);
+            }
+            
+            // Min stok dəyərini yenilə
+            if (stockData[category] && stockData[category][productName]) {
+                stockData[category][productName].minStock = minStock;
             }
             
             // Dropdown-ları yenilə
@@ -904,6 +1434,13 @@
             filterProductsByCategory();
             document.getElementById('productName').value = productName;
             document.getElementById('minStock').value = minStock;
+            
+            // İdarəetmə siyahılarını yenilə
+            loadCategoriesForManagement();
+            loadProductsForManagement();
+            
+            // Stok cədvəlini yenilə
+            loadStock();
         }
         
         // Məhsul dropdown-larını yenilə
@@ -929,7 +1466,7 @@
                 categorySelect.appendChild(option);
             });
             
-            if (currentCategory) {
+            if (currentCategory && categories.includes(currentCategory)) {
                 categorySelect.value = currentCategory;
                 filterProductsByCategory();
             }
@@ -995,7 +1532,11 @@
             // Modalı bağla
             closeClearStorageModal();
             
-            alert('Local storage uğurla təmizləndi!');
+            // İdarəetmə siyahılarını yenilə
+            if (document.getElementById('managementModal').style.display === 'flex') {
+                loadCategoriesForManagement();
+                loadProductsForManagement();
+            }
         }
     </script>
 </body>
