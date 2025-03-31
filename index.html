@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otel Anbar Yönetim Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --info: #4895ef;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h2 {
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        label {
+            font-weight: 500;
+            color: var(--secondary);
+            min-width: 100px;
+        }
+        
+        input, select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .select2-container--default .select2-selection--single {
+            height: 46px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 46px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-add {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-remove {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-export {
+            background-color: var(--info);
+            color: white;
+        }
+        
+        .btn-new-category {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        h3 {
+            margin: 25px 0 15px;
+            color: var(--secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        th {
+            background-color: var(--secondary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .empty-stock {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .low-stock {
+            color: #e53e3e;
+            font-weight: 500;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🏨 Otel Anbar Yönetim Sistemi</h2>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-row">
+                    <label for="productCategory">Kategori:</label>
+                    <select id="productCategory" class="js-example-basic-single">
+                        <option value="">Kategori seçin</option>
+                        <option value="Temizlik">Temizlik</option>
+                        <option value="Mutfak">Mutfak</option>
+                        <option value="Banyo">Banyo</option>
+                        <option value="Oda Malzemeleri">Oda Malzemeleri</option>
+                        <option value="Teknik Malzemeler">Teknik Malzemeleri</option>
+                    </select>
+                </div>
+                
+                <div class="input-row">
+                    <label for="productName">Ürün Adı:</label>
+                    <select id="productName" class="js-example-basic-single">
+                        <option value="">Ürün seçin veya yazın</option>
+                        <option value="Şampuan">Şampuan</option>
+                        <option value="Sabun">Sabun</option>
+                        <option value="Havlu">Havlu</option>
+                        <option value="Yatak Çarşafı">Yatak Çarşafı</option>
+                        <option value="Bardak">Bardak</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <div class="input-row">
+                    <label for="quantity">Miktar:</label>
+                    <input type="number" id="quantity" placeholder="Adet" min="1">
+                </div>
+                
+                <div class="input-row">
+                    <label for="minStock">Min. Stok:</label>
+                    <input type="number" id="minStock" placeholder="Min. stok seviyesi" min="0">
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn-add" onclick="addStock()">
+                <span>➕</span> Stok Ekle
+            </button>
+            <button class="btn-remove" onclick="removeStock()">
+                <span>➖</span> Stok Çıkar
+            </button>
+            <button class="btn-new-category" onclick="openNewProductModal()">
+                <span>🆕</span> Yeni Ürün Ekle
+            </button>
+            <button class="btn-export" onclick="exportToExcel()">
+                <span>📊</span> Excel'e Aktar
+            </button>
+        </div>
+        
+        <h3>
+            <span>📋 Stok Listesi</span>
+            <div>
+                <select id="filterCategory" onchange="filterStock()" style="padding: 8px; border-radius: 5px;">
+                    <option value="">Tüm Kategoriler</option>
+                    <option value="Temizlik">Temizlik</option>
+                    <option value="Mutfak">Mutfak</option>
+                    <option value="Banyo">Banyo</option>
+                </select>
+            </div>
+        </h3>
+        
+        <table id="stockTableForExport">
+            <thead>
+                <tr>
+                    <th>Kategori</th>
+                    <th>Ürün Adı</th>
+                    <th>Miktar</th>
+                    <th>Min. Stok</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody id="stockTable">
+                <!-- Stok verileri buraya eklenecek -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Yeni Ürün Ekleme Modalı -->
+    <div id="newProductModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Yeni Ürün Ekle</h3>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="newCategory">Kategori:</label>
+                <select id="newCategory" style="flex: 1;">
+                    <option value="">Yeni kategori ekle</option>
+                    <option value="Temizlik">Temizlik</option>
+                    <option value="Mutfak">Mutfak</option>
+                    <option value="Banyo">Banyo</option>
+                </select>
+                <input type="text" id="customCategory" placeholder="Veya yeni kategori adı" style="flex: 1; display: none;">
+            </div>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="newProductName">Ürün Adı:</label>
+                <input type="text" id="newProductName" placeholder="Ürün adı girin" style="flex: 1;">
+            </div>
+            
+            <div class="input-row" style="margin-bottom: 15px;">
+                <label for="defaultMinStock">Varsayılan Min. Stok:</label>
+                <input type="number" id="defaultMinStock" placeholder="Varsayılan min. stok" min="0" style="flex: 1;">
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeNewProductModal()" style="background: #ccc;">İptal</button>
+                <button onclick="saveNewProduct()" class="btn-add">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // Select2 ile arama yapılabilir dropdown'ları başlat
+        $(document).ready(function() {
+            $('.js-example-basic-single').select2({
+                tags: true,
+                placeholder: "Seçin veya yazın",
+                allowClear: true
+            });
+            
+            $('#productCategory').on('change', function() {
+                filterProductsByCategory();
+            });
+            
+            $('#newCategory').on('change', function() {
+                if(this.value === '') {
+                    $('#customCategory').show();
+                } else {
+                    $('#customCategory').hide();
+                }
+            });
+        });
+        
+        // Stok veri yapısı
+        let stockData = JSON.parse(localStorage.getItem('stockData')) || {};
+        let productCatalog = JSON.parse(localStorage.getItem('productCatalog')) || {
+            "Temizlik": ["Şampuan", "Sabun", "Diş Macunu", "Tuvalet Kağıdı"],
+            "Mutfak": ["Bardak", "Tabak", "Çatal", "Kaşık"],
+            "Banyo": ["Havlu", "Bornoz", "Terlik"],
+            "Oda Malzemeleri": ["Yastık", "Yatak Çarşafı", "Battaniye"]
+        };
+        
+        // Sayfa yüklendiğinde stokları yükle
+        window.onload = function() {
+            loadStock();
+            updateProductDropdowns();
+        };
+        
+        // Stok yükleme fonksiyonu
+        function loadStock() {
+            const table = document.getElementById('stockTable');
+            table.innerHTML = '';
+            
+            if (Object.keys(stockData).length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="empty-stock">Stokta ürün bulunmamaktadır</td></tr>';
+                return;
+            }
+            
+            for (const category in stockData) {
+                for (const product in stockData[category]) {
+                    const item = stockData[category][product];
+                    const row = document.createElement('tr');
+                    
+                    const isLowStock = item.quantity <= item.minStock;
+                    
+                    row.innerHTML = `
+                        <td><span class="category-badge">${category}</span></td>
+                        <td>${product}</td>
+                        <td class="${isLowStock ? 'low-stock' : ''}">${item.quantity}</td>
+                        <td>${item.minStock || '-'}</td>
+                        <td>${isLowStock ? '⚠️ Düşük Stok' : '✅ Yeterli'}</td>
+                    `;
+                    table.appendChild(row);
+                }
+            }
+        }
+        
+        // Stok ekleme fonksiyonu
+        function addStock() {
+            const category = document.getElementById('productCategory').value;
+            const product = document.getElementById('productName').value.trim();
+            const qty = parseInt(document.getElementById('quantity').value);
+            const minStock = parseInt(document.getElementById('minStock').value) || 0;
+            
+            if (!category || !product || !qty || qty <= 0) {
+                alert('Lütfen geçerli bir kategori, ürün adı ve miktar giriniz!');
+                return;
+            }
+            
+            // Stok verisini güncelle
+            if (!stockData[category]) {
+                stockData[category] = {};
+            }
+            
+            if (!stockData[category][product]) {
+                stockData[category][product] = {
+                    quantity: 0,
+                    minStock: minStock
+                };
+                
+                // Ürün kataloğuna ekle (eğer yoksa)
+                if (!productCatalog[category] || !productCatalog[category].includes(product)) {
+                    if (!productCatalog[category]) {
+                        productCatalog[category] = [];
+                    }
+                    productCatalog[category].push(product);
+                    updateProductDropdowns();
+                }
+            }
+            
+            stockData[category][product].quantity += qty;
+            
+            // Min stock değerini güncelle (eğer verildiyse)
+            if (minStock > 0) {
+                stockData[category][product].minStock = minStock;
+            }
+            
+            saveData();
+            loadStock();
+            clearInputs();
+        }
+        
+        // Stok çıkarma fonksiyonu
+        function removeStock() {
+            const category = document.getElementById('productCategory').value;
+            const product = document.getElementById('productName').value.trim();
+            const qty = parseInt(document.getElementById('quantity').value);
+            
+            if (!category || !product || !qty || qty <= 0) {
+                alert('Lütfen geçerli bir kategori, ürün adı ve miktar giriniz!');
+                return;
+            }
+            
+            if (!stockData[category] || !stockData[category][product]) {
+                alert('Bu ürün stokta bulunmamaktadır!');
+                return;
+            }
+            
+            stockData[category][product].quantity -= qty;
+            
+            // Stok sıfır veya altına düşerse
+            if (stockData[category][product].quantity <= 0) {
+                delete stockData[category][product];
+                
+                // Kategori boşsa kategoriyi de sil
+                if (Object.keys(stockData[category]).length === 0) {
+                    delete stockData[category];
+                }
+            }
+            
+            saveData();
+            loadStock();
+            clearInputs();
+        }
+        
+        // Excel'e aktarma fonksiyonu
+        function exportToExcel() {
+            if (Object.keys(stockData).length === 0) {
+                alert('Excel\'e aktarılacak veri bulunamadı!');
+                return;
+            }
+            
+            // Excel verisini hazırla
+            const data = [
+                ['Kategori', 'Ürün Adı', 'Miktar', 'Min. Stok', 'Durum'] // Başlık satırı
+            ];
+            
+            // Stok verilerini diziye ekle
+            for (const category in stockData) {
+                for (const product in stockData[category]) {
+                    const item = stockData[category][product];
+                    const isLowStock = item.quantity <= item.minStock;
+                    data.push([
+                        category,
+                        product,
+                        item.quantity,
+                        item.minStock || '-',
+                        isLowStock ? 'Düşük Stok' : 'Yeterli'
+                    ]);
+                }
+            }
+            
+            // Çalışma sayfası oluştur
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Çalışma kitabı oluştur
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Stok Listesi");
+            
+            // Excel dosyasını indir
+            const date = new Date();
+            const fileName = `Otel_Stok_Listesi_${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+        
+        // Kategoriye göre ürünleri filtrele
+        function filterProductsByCategory() {
+            const category = $('#productCategory').val();
+            const $productSelect = $('#productName');
+            
+            $productSelect.empty();
+            $productSelect.append('<option value=""></option>');
+            
+            if (category && productCatalog[category]) {
+                productCatalog[category].forEach(product => {
+                    $productSelect.append(`<option value="${product}">${product}</option>`);
+                });
+            }
+            
+            $productSelect.select2({
+                tags: true,
+                placeholder: "Ürün seçin veya yazın",
+                allowClear: true
+            });
+        }
+        
+        // Stokları kategoriye göre filtrele
+        function filterStock() {
+            const category = document.getElementById('filterCategory').value;
+            const rows = document.getElementById('stockTable').getElementsByTagName('tr');
+            
+            for (let row of rows) {
+                if (row.cells.length > 0) {
+                    const rowCategory = row.cells[0].textContent.trim();
+                    if (!category || rowCategory === category) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        // Yeni ürün modalını aç
+        function openNewProductModal() {
+            document.getElementById('newProductModal').style.display = 'flex';
+        }
+        
+        // Yeni ürün modalını kapat
+        function closeNewProductModal() {
+            document.getElementById('newProductModal').style.display = 'none';
+            document.getElementById('newProductName').value = '';
+            document.getElementById('defaultMinStock').value = '';
+            document.getElementById('newCategory').value = '';
+            document.getElementById('customCategory').value = '';
+            document.getElementById('customCategory').style.display = 'none';
+        }
+        
+        // Yeni ürün kaydet
+        function saveNewProduct() {
+            let category = document.getElementById('newCategory').value;
+            const customCategory = document.getElementById('customCategory').value.trim();
+            const productName = document.getElementById('newProductName').value.trim();
+            const minStock = parseInt(document.getElementById('defaultMinStock').value) || 0;
+            
+            if (category === '' && customCategory) {
+                category = customCategory;
+            }
+            
+            if (!category || !productName) {
+                alert('Lütfen kategori ve ürün adı giriniz!');
+                return;
+            }
+            
+            // Kataloğa ekle
+            if (!productCatalog[category]) {
+                productCatalog[category] = [];
+            }
+            
+            if (!productCatalog[category].includes(productName)) {
+                productCatalog[category].push(productName);
+            }
+            
+            // Dropdown'ları güncelle
+            updateProductDropdowns();
+            
+            // Modalı kapat ve inputları temizle
+            closeNewProductModal();
+            
+            // Kategori ve ürün seçimini yeni eklenene ayarla
+            $('#productCategory').val(category).trigger('change');
+            $('#productName').val(productName).trigger('change');
+            document.getElementById('minStock').value = minStock;
+        }
+        
+        // Ürün dropdown'larını güncelle
+        function updateProductDropdowns() {
+            localStorage.setItem('productCatalog', JSON.stringify(productCatalog));
+            
+            // Kategori dropdown'ını güncelle
+            const $categorySelect = $('#productCategory');
+            const currentCategory = $categorySelect.val();
+            
+            $categorySelect.empty();
+            $categorySelect.append('<option value=""></option>');
+            
+            for (const category in productCatalog) {
+                $categorySelect.append(`<option value="${category}">${category}</option>`);
+            }
+            
+            if (currentCategory) {
+                $categorySelect.val(currentCategory).trigger('change');
+            }
+            
+            // Filtre dropdown'ını güncelle
+            const $filterSelect = $('#filterCategory');
+            $filterSelect.innerHTML = '<option value="">Tüm Kategoriler</option>';
+            
+            for (const category in productCatalog) {
+                $filterSelect.innerHTML += `<option value="${category}">${category}</option>`;
+            }
+        }
+        
+        // Verileri kaydet
+        function saveData() {
+            localStorage.setItem('stockData', JSON.stringify(stockData));
+        }
+        
+        // Inputları temizle
+        function clearInputs() {
+            document.getElementById('quantity').value = '';
+            document.getElementById('minStock').value = '';
+        }
+    </script>
+</body>
+</html>
