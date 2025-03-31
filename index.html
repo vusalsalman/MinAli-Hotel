@@ -46,7 +46,7 @@
         h2 {
             color: var(--secondary);
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -58,34 +58,35 @@
         .input-section {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         
         .input-row {
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         label {
             font-weight: 500;
             color: var(--secondary);
+            font-size: 14px;
         }
         
         input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s;
         }
         
@@ -96,11 +97,11 @@
         }
         
         button {
-            padding: 12px;
+            padding: 10px 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s;
             display: flex;
@@ -108,7 +109,6 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            margin-bottom: 10px;
         }
         
         .btn-add {
@@ -141,6 +141,11 @@
             color: white;
         }
         
+        .btn-filter {
+            background-color: #6c757d;
+            color: white;
+        }
+        
         button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
@@ -149,34 +154,69 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
         }
         
         .quick-actions {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         
         .quick-actions button {
             margin-bottom: 0;
             flex: 1;
+            padding: 10px;
+        }
+        
+        .stock-status-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .stock-status-tabs button {
+            padding: 8px 12px;
+            white-space: nowrap;
+        }
+        
+        .stock-status-tabs button.active {
+            font-weight: bold;
+            transform: none;
+        }
+        
+        .stock-status-tabs button.low-stock {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .stock-status-tabs button.critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .stock-status-tabs button.normal {
+            background-color: #28a745;
+            color: white;
         }
         
         h3 {
-            margin: 20px 0 15px;
+            margin: 15px 0 10px;
             color: var(--secondary);
             display: flex;
             flex-direction: column;
             gap: 10px;
+            font-size: 1.1rem;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             font-size: 14px;
             overflow-x: auto;
             display: block;
@@ -185,13 +225,15 @@
         th {
             background-color: var(--secondary);
             color: white;
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
+            font-weight: 500;
         }
         
         td {
-            padding: 12px;
+            padding: 10px 12px;
             border-bottom: 1px solid #ddd;
+            vertical-align: top;
         }
         
         tr:nth-child(even) {
@@ -211,7 +253,7 @@
         
         .category-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
@@ -222,6 +264,44 @@
         .low-stock {
             color: #e53e3e;
             font-weight: 500;
+        }
+        
+        .critical-stock {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .normal-stock {
+            color: #28a745;
+        }
+        
+        .history-item {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .history-qty {
+            font-weight: 500;
+        }
+        
+        .history-type-add {
+            color: #28a745;
+        }
+        
+        .history-type-remove {
+            color: #dc3545;
         }
         
         .modal {
@@ -251,7 +331,7 @@
         .modal-title {
             margin-bottom: 15px;
             color: var(--secondary);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -266,7 +346,7 @@
         
         .modal-actions button {
             width: auto;
-            padding: 10px 20px;
+            padding: 8px 16px;
         }
         
         .date-input {
@@ -285,13 +365,13 @@
         .filter-controls {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
         }
         
         .filter-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
         }
         
@@ -302,7 +382,7 @@
         .delete-btn {
             color: var(--danger);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.2s;
         }
         
@@ -313,9 +393,9 @@
         .edit-btn {
             color: var(--info);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.2s;
-            margin-right: 10px;
+            margin-right: 8px;
         }
         
         .edit-btn:hover {
@@ -331,7 +411,7 @@
         }
         
         .confirmation-modal .modal-icon {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 15px;
             color: var(--danger);
         }
@@ -353,7 +433,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-bottom: 1px solid #eee;
         }
         
@@ -363,18 +443,19 @@
         
         .management-item-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         
         @media (min-width: 768px) {
             .container {
-                padding: 25px;
+                padding: 20px;
             }
             
             .input-section {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 20px;
+                gap: 15px;
+                margin-top: 30px;
             }
             
             .input-row {
@@ -383,7 +464,13 @@
             }
             
             label {
-                min-width: 100px;
+                min-width: 90px;
+                font-size: 14px;
+            }
+            
+            input, select {
+                font-size: 14px;
+                padding: 10px 12px;
             }
             
             .action-buttons {
@@ -394,6 +481,7 @@
             .action-buttons button {
                 width: auto;
                 flex: 1;
+                padding: 10px;
             }
             
             .quick-actions {
@@ -404,16 +492,31 @@
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
+                font-size: 1.2rem;
             }
             
             .filter-controls {
                 flex-direction: row;
                 align-items: center;
+                gap: 10px;
+            }
+            
+            .stock-status-tabs {
+                margin-bottom: 10px;
+                margin-top: 20px;
+            }
+            
+            .stock-status-tabs button {
+                padding: 8px 12px;
             }
             
             table {
-                font-size: 16px;
+                font-size: 14px;
                 display: table;
+            }
+            
+            th, td {
+                padding: 10px 12px;
             }
         }
     </style>
@@ -486,6 +589,7 @@
             </button>
         </div>
         
+        
         <h3>
             <span>📋 Stok Siyahısı</span>
             <div class="filter-controls">
@@ -508,9 +612,9 @@
                     <tr>
                         <th>Kateqoriya</th>
                         <th>Məhsul Adı</th>
-                        <th>Miqdar</th>
+                        <th>Stok</th>
                         <th>Min. Stok</th>
-                        <th>Son Əməliyyat Tarixi</th>
+                        <th>Əməliyyat Tarixçəsi</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
@@ -665,6 +769,7 @@
         let currentDateFilter = 'all';
         let customDateRange = null;
         let currentDeleteAction = { type: null, data: null };
+        let currentStockStatusFilter = 'all';
         
         // Səhifə yükləndikdə
         document.addEventListener('DOMContentLoaded', function() {
@@ -682,6 +787,19 @@
                 filterProductsByCategory();
             });
         });
+        
+        // Stok statusuna görə filtrlə
+        function filterByStockStatus(status) {
+            currentStockStatusFilter = status;
+            
+            // Tab düymələrini yenilə
+            document.querySelectorAll('.stock-status-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            loadStock();
+        }
         
         // Tabları dəyişdir
         function switchTab(tab) {
@@ -905,45 +1023,82 @@
                 for (const product in stockData[category]) {
                     const item = stockData[category][product];
                     
+                    // Stok statusunu yoxla
+                    let stockStatus = 'normal';
+                    if (item.quantity <= 0) {
+                        stockStatus = 'critical';
+                    } else if (item.quantity <= item.minStock) {
+                        stockStatus = 'low';
+                    }
+                    
+                    // Əgər stok status filtri aktivdirsə və uyğun gəlmirsə, keç
+                    if (currentStockStatusFilter !== 'all' && 
+                        (currentStockStatusFilter === 'critical' && stockStatus !== 'critical') &&
+                        (currentStockStatusFilter === 'low' && stockStatus !== 'low') &&
+                        (currentStockStatusFilter === 'normal' && stockStatus !== 'normal')) {
+                        continue;
+                    }
+                    
                     // Əgər tarix filtri aktivdirsə, yalnız uyğun gələn tarixləri göstər
                     let showItem = true;
-                    let lastOperationDate = null;
-                    let lastOperation = '-';
+                    let filteredHistory = [];
                     
                     if (item.history && item.history.length > 0) {
-                        // Ən son əməliyyatı tap
-                        const sortedHistory = [...item.history].sort((a, b) => new Date(b.date) - new Date(a.date));
-                        lastOperation = sortedHistory[0];
-                        lastOperationDate = new Date(lastOperation.date);
-                        
                         // Tarix filtri tətbiq et
                         if (currentDateFilter !== 'all') {
-                            showItem = false;
-                            
-                            // Bütün tarix qeydlərini yoxla
-                            for (const entry of item.history) {
+                            filteredHistory = item.history.filter(entry => {
                                 const entryDate = new Date(entry.date);
-                                if (checkDateFilter(entryDate)) {
-                                    showItem = true;
-                                    break;
-                                }
-                            }
+                                return checkDateFilter(entryDate);
+                            });
+                            
+                            showItem = filteredHistory.length > 0;
+                        } else {
+                            filteredHistory = item.history;
                         }
                     }
                     
                     if (showItem) {
                         hasData = true;
-                        const isLowStock = item.quantity <= item.minStock;
-                        const formattedDate = lastOperationDate ? formatDate(lastOperationDate) : '-';
+                        const isCritical = stockStatus === 'critical';
+                        const isLowStock = stockStatus === 'low';
+                        
+                        // Tarixçəni hazırla
+                        let historyHTML = '';
+                        if (filteredHistory.length > 0) {
+                            // Ən son 3 əməliyyatı göstər
+                            const sortedHistory = [...filteredHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+                            const displayHistory = sortedHistory.slice(0, 3);
+                            
+                            displayHistory.forEach(entry => {
+                                const entryDate = new Date(entry.date);
+                                historyHTML += `
+                                    <div class="history-item">
+                                        <div class="history-date">${formatDate(entryDate)}</div>
+                                        <div class="history-qty ${entry.type === 'add' ? 'history-type-add' : 'history-type-remove'}">
+                                            ${entry.type === 'add' ? '+' : '-'}${entry.qty} ədəd
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            if (sortedHistory.length > 3) {
+                                historyHTML += `<div class="history-item">+ ${sortedHistory.length - 3} daha...</div>`;
+                            }
+                        } else {
+                            historyHTML = '-';
+                        }
                         
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td><span class="category-badge">${category}</span></td>
                             <td>${product}</td>
-                            <td class="${isLowStock ? 'low-stock' : ''}">${item.quantity}</td>
+                            <td class="${isCritical ? 'critical-stock' : isLowStock ? 'low-stock' : 'normal-stock'}">${item.quantity}</td>
                             <td>${item.minStock || '-'}</td>
-                            <td>${formattedDate}</td>
-                            <td>${isLowStock ? '⚠️ Aşağı Stok' : '✅ Kifayətdir'}</td>
+                            <td>${historyHTML}</td>
+                            <td>
+                                ${isCritical ? '❌ Tükənib' : 
+                                 isLowStock ? '⚠️ Azalıb' : '✅ Normal'}
+                            </td>
                             <td><i class="fas fa-trash-alt delete-btn" onclick="showDeleteConfirmation('stock', '${category}', '${product}')" title="Məhsulu sil"></i></td>
                         `;
                         table.appendChild(row);
@@ -1025,10 +1180,6 @@
         
         // Məhsulu sil
         function deleteProduct(category, product, fromManagement = false) {
-            if (!fromManagement && !confirm(`"${product}" məhsulunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz!`)) {
-                return;
-            }
-            
             if (stockData[category] && stockData[category][product]) {
                 delete stockData[category][product];
                 
@@ -1177,13 +1328,21 @@
             
             // Excel verisini hazırla
             const data = [
-                ['Kateqoriya', 'Məhsul Adı', 'Miqdar', 'Əməliyyat Növü', 'Tarix'] // Başlıq sətri
+                ['Kateqoriya', 'Məhsul Adı', 'Cari Miqdar', 'Min. Stok', 'Əməliyyat Növü', 'Miqdar', 'Tarix', 'Status'] // Başlıq sətri
             ];
             
             // Stok verilərini massivə əlavə et
             for (const category in stockData) {
                 for (const product in stockData[category]) {
                     const item = stockData[category][product];
+                    
+                    // Stok statusunu müəyyən et
+                    let status = 'Normal';
+                    if (item.quantity <= 0) {
+                        status = 'Tükənib';
+                    } else if (item.quantity <= item.minStock) {
+                        status = 'Azalıb';
+                    }
                     
                     if (item.history && item.history.length > 0) {
                         item.history.forEach(entry => {
@@ -1200,9 +1359,12 @@
                                 data.push([
                                     category,
                                     product,
-                                    entry.qty,
+                                    item.quantity,
+                                    item.minStock || '-',
                                     entry.type === 'add' ? 'Daxilolma' : 'Çıxış',
-                                    formatDate(entryDate)
+                                    entry.qty,
+                                    formatDate(entryDate),
+                                    status
                                 ]);
                             }
                         });
@@ -1213,8 +1375,11 @@
                                 category,
                                 product,
                                 item.quantity,
+                                item.minStock || '-',
                                 'Cari balans',
-                                '-'
+                                '-',
+                                '-',
+                                status
                             ]);
                         }
                     }
@@ -1421,6 +1586,15 @@
             // Min stok dəyərini yenilə
             if (stockData[category] && stockData[category][productName]) {
                 stockData[category][productName].minStock = minStock;
+            } else if (!stockData[category] || !stockData[category][productName]) {
+                if (!stockData[category]) {
+                    stockData[category] = {};
+                }
+                stockData[category][productName] = {
+                    quantity: 0,
+                    minStock: minStock,
+                    history: []
+                };
             }
             
             // Dropdown-ları yenilə
