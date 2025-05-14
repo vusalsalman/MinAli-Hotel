@@ -874,7 +874,32 @@
 </head>
 <body>
     <div id="alert-container"></div>
-    
+    <!-- Login Modal -->
+<div class="modal" id="loginModal" style="display: flex;">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3>Hotel Maliyyə Paneli - Giriş</h3>
+        </div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-role">Rol</label>
+                <select id="login-role" class="form-control" required>
+                    <option value="">Seçin</option>
+                    <option value="admin">Admin</option>
+                    <option value="manager">Menecer</option>
+                    <option value="reception">Resepşn</option>
+                </select>
+            </div>
+            <div class="form-group" id="password-group" style="display: none;">
+                <label for="login-password">Parol</label>
+                <input type="password" id="login-password" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn">Daxil ol</button>
+            </div>
+        </form>
+    </div>
+</div>
     <div class="responsive-wrapper">
         <div class="app">
             <header class="app-header">
@@ -3041,7 +3066,6 @@ function calculateNightsAndTotal() {
         document.getElementById('detail-balance').textContent = (totalAmount - paidAmount).toFixed(2);
     }
 }
-
 function renderTimeline() {
     const timelineGrid = document.getElementById('timeline-grid');
     timelineGrid.innerHTML = '';
@@ -3102,10 +3126,11 @@ function renderTimeline() {
             dayCell.dataset.room = room.number;
             dayCell.dataset.date = dayStr;
             
-            // Check for reservation that starts on this day
+            // Check if this day is part of any reservation
             const reservation = reservations.find(r => 
                 r.roomNumber === room.number && 
-                dayStr === r.checkInDate
+                dayStr >= r.checkInDate && 
+                dayStr < r.checkOutDate
             );
             
             if (reservation) {
@@ -3115,24 +3140,31 @@ function renderTimeline() {
                     continue;
                 }
                 
-                const reservationEl = createReservationElement(reservation, status, day);
-                dayCell.appendChild(reservationEl);
-                
-                // Calculate how many days this reservation spans in the current week
-                const startDate = new Date(reservation.checkInDate);
-                const endDate = new Date(Math.min(new Date(reservation.checkOutDate), new Date(timelineEnd)));
-
-                const dayCount = calculateNights(startDate, endDate);
-                
-                // Set grid column span to cover all days of the reservation in current week
-                if (dayCount > 1) {
-                    reservationEl.style.gridColumn = `span ${dayCount}`;
+                // Only create reservation element on the first day
+                if (dayStr === reservation.checkInDate) {
+                    const reservationEl = createReservationElement(reservation, status, day);
+                    dayCell.appendChild(reservationEl);
+                    
+                    // Calculate how many days this reservation spans in the current week
+                    const startDate = new Date(reservation.checkInDate);
+                    const endDate = new Date(Math.min(new Date(reservation.checkOutDate), new Date(timelineEnd)));
+                    const dayCount = calculateNights(startDate, endDate);
+                    
+                    // Set grid column span to cover all days of the reservation in current week
+                    if (dayCount > 1) {
+                        reservationEl.style.gridColumn = `span ${dayCount}`;
+                    }
+                    
+                    reservationEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openReservationModal(reservation);
+                    });
+                } else {
+                    // For subsequent days, just mark the cell as reserved
+                    dayCell.style.backgroundColor = 'rgba(69, 255, 188, 0.1)';
+                    dayCell.style.borderLeft = '1px dashed var(--c-green-500)';
+                    dayCell.style.borderRight = '1px dashed var(--c-green-500)';
                 }
-                
-                reservationEl.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openReservationModal(reservation);
-                });
             } else {
                 dayCell.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -3144,8 +3176,6 @@ function renderTimeline() {
         }
     });
 }
-
-
 function openReservationModal(reservationOrRoom, date) {
     const modal = document.getElementById('reservationModal');
     const form = document.getElementById('reservation-form');
@@ -4418,6 +4448,98 @@ function initPersonalManagementEvents() {
         document.getElementById('dailySalaryGroup').style.display = this.checked ? 'flex' : 'none';
     });
 }
+
+// User roles and permissions
+const userRoles = {
+    admin: { password: null, tabs: ['dashboard', 'transactions', 'categories', 'reservations', 'personal'] },
+    manager: { password: '1234', tabs: ['dashboard', 'transactions', 'categories', 'reservations', 'personal'] },
+    reception: { password: null, tabs: ['reservations'] }
+};
+
+let currentUser = null;
+
+// Initialize login system
+function initLoginSystem() {
+    const loginModal = document.getElementById('loginModal');
+    const loginForm = document.getElementById('login-form');
+    const roleSelect = document.getElementById('login-role');
+    const passwordGroup = document.getElementById('password-group');
+    
+    // Show/hide password field based on role
+    roleSelect.addEventListener('change', function() {
+        const role = this.value;
+        passwordGroup.style.display = userRoles[role]?.password ? 'block' : 'none';
+    });
+    
+    // Handle login
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const role = roleSelect.value;
+        const password = document.getElementById('login-password').value;
+        
+        if (!role) {
+            showAlert('danger', 'Zəhmət olmasa rol seçin');
+            return;
+        }
+        
+        if (userRoles[role].password && userRoles[role].password !== password) {
+            showAlert('danger', 'Yanlış parol');
+            return;
+        }
+        
+        currentUser = role;
+        loginModal.style.display = 'none';
+        
+        // Set up UI based on role
+        setupUIForUser(role);
+        showAlert('success', `Xoş gəlmisiniz, ${role}`);
+    });
+}
+
+// Set up UI based on user role
+function setupUIForUser(role) {
+    const allowedTabs = userRoles[role].tabs;
+    
+    // Hide all tabs first
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Show only allowed tabs
+    allowedTabs.forEach(tabId => {
+        const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+        if (tab) tab.style.display = 'block';
+    });
+    
+    // Activate first allowed tab
+    if (allowedTabs.length > 0) {
+        document.querySelector(`.tab[data-tab="${allowedTabs[0]}"]`).click();
+    }
+    
+    // Hide financial export button for reception
+    if (role === 'reception') {
+        document.getElementById('export-excel-btn').style.display = 'none';
+    } else {
+        document.getElementById('export-excel-btn').style.display = 'block';
+    }
+}
+
+// Update DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    initLoginSystem(); // Initialize login system first
+    
+    // Rest of your existing initialization code...
+    const now = new Date();
+    document.getElementById('transaction-date').value = now.toISOString().slice(0, 16);
+    
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('export-start-date').value = firstDay;
+    document.getElementById('export-end-date').value = today;
+    
+    // Don't initialize other parts until login
+});
 // Make function available globally for inline event handlers
 window.editPayment = editPayment;
 </script>
